@@ -1,16 +1,53 @@
 <!DOCTYPE html>
-<html lang="">
-  <head>
+<html lang="zh-CN">
+<head>
     <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vite App</title>
-    <script type="module" crossorigin src="/assets/index-CIvyFOB2.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-2ZaS5HyD.css">
-  </head>
-  <body>
-    <div id="app"></div>
-    <div><p>
-      <a href="test.html">test</a></p></div>
-  </body>
+    <title>MC服务器状态检测</title>
+</head>
+<body>
+    <h1>Minecraft 服务器状态检测</h1>
+    <input type="text" id="serverAddress" placeholder="输入服务器地址">
+    <button onclick="checkServerStatus()">检测状态</button>
+    <hr>
+    <div id="statusResult"></div>
+
+    <script>
+        async function checkServerStatus() {
+            const address = document.getElementById('serverAddress').value;
+            const resultDiv = document.getElementById('statusResult');
+
+            if (!address) {
+                resultDiv.innerHTML = '<p style="color: red;">请输入服务器地址！</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<p>正在查询...</p>';
+
+            try {
+                // 使用 mcapi.us 的 API
+                const response = await fetch(`https://api.mcapi.us/server/status?ip=${address}`);
+                const data = await response.json();
+
+                if (data.online) {
+                    // 解析MOTD
+                    const motd = data.motd.html.join('<br>');
+
+                    resultDiv.innerHTML = `
+                        <h2 style="color: green;">服务器在线</h2>
+                        <p><strong>地址:</strong> ${address}</p>
+                        <p><strong>玩家:</strong> ${data.players.now} / ${data.players.max}</p>
+                        <p><strong>版本:</strong> ${data.server.name}</p>
+                        <div><strong>MOTD:</strong><br><div style="font-family: monospace; border: 1px solid #ccc; padding: 10px; background: #f5f5f5;">${motd}</div></div>
+                        ${data.favicon ? `<p><strong>图标:</strong><br><img src="${data.favicon}" alt="Server Icon"></p>` : ''}
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<h2 style="color: red;">服务器离线</h2><p>${data.error || '无法获取状态'}</p>`;
+                }
+            } catch (error) {
+                console.error('查询出错:', error);
+                resultDiv.innerHTML = `<h2 style="color: red;">查询失败</h2><p>请检查服务器地址是否正确，或稍后再试。请注意浏览器控制台中的错误信息。</p>`;
+            }
+        }
+    </script>
+</body>
 </html>
