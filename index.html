@@ -93,7 +93,7 @@
     <div class="music-container">
         <!-- 珍珠 -->
         <div class="music-card">
-            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="https://music.163.com/outchain/player?type=2&id=2725335189&auto=1&height=66"></iframe>
+            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="https://music.163.com/outchain/player?type=2&id=2725335189&auto=0&height=66"></iframe>
         </div>
         <div class="music-card">
             <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1963526955&auto=0&height=66"></iframe>
@@ -105,23 +105,42 @@
     <footer>
         Hosted with ❤️ by ICOCOER
     </footer>
-     <script>
-        window.addEventListener('blur', function() {
-            setTimeout(function() {
-                var activeElement = document.activeElement;
-                if (activeElement && activeElement.tagName === 'IFRAME') {
-                    var allIframes = document.querySelectorAll('iframe');
-                    
-                    allIframes.forEach(function(iframe) {
-                        if (iframe !== activeElement) {
-                            var currentSrc = iframe.src;
-                            var safeSrc = currentSrc.replace('auto=1', 'auto=0');
-                            iframe.src = safeSrc; 
-                        }
-                    });
-                }
-            }, 100);
-        });
-    </script>
+    <script>
+    // 记录上一次获得焦点的那个播放器
+    var lastFocusedIframe = null;
+
+    // 开启一个定时巡逻，每 200 毫秒（0.2秒）检查一次
+    setInterval(function() {
+        // 获取当前谁拿着“麦克风”（获得焦点的元素）
+        var currentElement = document.activeElement;
+
+        // 1. 判断当前拿着麦克风的是不是一个 iframe（播放器）
+        if (currentElement && currentElement.tagName === 'IFRAME') {
+            
+            // 2. 关键判断：如果当前的播放器，不是上一次记录的那个（说明用户刚切换了播放器）
+            if (currentElement !== lastFocusedIframe) {
+                
+                // 更新记录，标记它为最新的活跃播放器
+                lastFocusedIframe = currentElement;
+
+                // 3. 执行“清场”行动：把除了它以外的所有播放器都刷新（停止）
+                var allIframes = document.querySelectorAll('iframe');
+                allIframes.forEach(function(iframe) {
+                    // 只要不是当前正在点的这个，就重置
+                    if (iframe !== currentElement) {
+                        // 这里为了避免不必要的闪烁，可以加一个判断：
+                        // 只有当链接里没有 auto=0 的时候才强制加，或者直接刷新
+                        // 简单起见，直接刷新 src 来停止播放
+                        iframe.src = iframe.src;
+                    }
+                });
+            }
+        } else {
+            // 如果用户点到了网页空白处（不是 iframe），就把记录清空
+            // 这样用户下次再点同一个播放器时，也能触发检查（虽然通常不需要）
+            lastFocusedIframe = null;
+        }
+    }, 200); 
+</script>
 </body>
 </html>
