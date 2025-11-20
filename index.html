@@ -107,4 +107,22 @@
     </footer>
 
 </body>
+    <script>
+        window.addEventListener('blur', function() {
+            setTimeout(function() {
+                var activeElement = document.activeElement;
+                if (activeElement && activeElement.tagName === 'IFRAME') {
+                    var allIframes = document.querySelectorAll('iframe');
+                    
+                    allIframes.forEach(function(iframe) {
+                        if (iframe !== activeElement) {
+                            var currentSrc = iframe.src;
+                            var safeSrc = currentSrc.replace('auto=1', 'auto=0');
+                            iframe.src = safeSrc; 
+                        }
+                    });
+                }
+            }, 100);
+        });
+    </script>
 </html>
