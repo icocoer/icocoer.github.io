@@ -20,3 +20,4 @@ function displayVersions(versions) {
 }
 
 fetchVersions();
+displayVersions([]);
