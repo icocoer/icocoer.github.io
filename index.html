@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>MC服务器状态检测</title>
+    <title>听听音乐吧</title>
     <style>
         body { font-family: sans-serif; line-height: 1.6; padding: 20px; }
         input[type="text"] { padding: 8px; width: 300px; }
@@ -12,55 +12,6 @@
     </style>
 </head>
 <body>
-    <h1>Minecraft 服务器状态</h1>
-    <input type="text" id="serverAddress" placeholder="输入服务器地址 (例如 play.hypixel.net)">
-    <button onclick="checkServerStatus()">检测状态</button>
-    <hr>
-    <div id="statusResult"></div>
-
-    <script>
-        async function checkServerStatus() {
-            const address = document.getElementById('serverAddress').value;
-            const resultDiv = document.getElementById('statusResult');
-
-            if (!address) {
-                resultDiv.innerHTML = '<p style="color: red;">请输入服务器地址！</p>';
-                return;
-            }
-
-            resultDiv.innerHTML = '<p>正在查询...</p>';
-
-            try {
-                // 【修正 1】: 更新API地址为 mcapi.us
-                const response = await fetch(`https://mcapi.us/server/status?ip=${address}`);
-                const data = await response.json();
-                
-                // 检查API返回的内部状态是否成功
-                if (data.status !== 'success') {
-                     throw new Error(data.error || 'API返回了错误状态');
-                }
-
-                if (data.online) {
-                    // 【修正 2】: 直接使用 data.motd 获取纯文本MOTD，而不是 data.motd.html
-                    // 为了更好地显示，将换行符 \n 替换为 <br>
-                    const motd = data.motd ? data.motd.replace(/\n/g, '<br>') : '无MOTD信息';
-
-                    resultDiv.innerHTML = `
-                        <h2 style="color: green;">✔ 服务器在线</h2>
-                        <p><strong>地址:</strong> ${address}</p>
-                        <p><strong>玩家:</strong> ${data.players.now} / ${data.players.max}</p>
-                        <p><strong>版本:</strong> ${data.server.name} (协议: ${data.server.protocol})</p>
-                        <div><strong>MOTD:</strong><br><div class="motd-box">${motd}</div></div>
-                        ${data.favicon ? `<p><strong>图标:</strong><br><img src="${data.favicon}" alt="Server Icon"></p>` : ''}
-                    `;
-                } else {
-                    resultDiv.innerHTML = `<h2 style="color: red;">❌ 服务器离线</h2>`;
-                }
-            } catch (error) {
-                console.error('查询出错:', error);
-                resultDiv.innerHTML = `<h2 style="color: red;">查询失败</h2><p>请检查服务器地址或网络连接，并在浏览器控制台查看详细错误。</p><p>错误信息: ${error.message}</p>`;
-            }
-        }
-    </script>
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=2725335189&auto=1&height=66"></iframe>
 </body>
 </html>
