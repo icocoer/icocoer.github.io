@@ -2,17 +2,109 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>听听音乐吧</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>听点音乐吧</title>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; padding: 20px; }
-        input[type="text"] { padding: 8px; width: 300px; }
-        button { padding: 8px 15px; }
-        #statusResult { margin-top: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
-        .motd-box { font-family: 'Courier New', Courier, monospace; border: 1px solid #ccc; padding: 10px; background: #f5f5f5; white-space: pre-wrap; }
+        /* 页面整体重置与背景 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* 淡雅的渐变背景 */
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        /* 标题样式 */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        /* 音乐容器：使用 Flexbox 自动换行 */
+        .music-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px; /* 播放器之间的间距 */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 单个播放器卡片外壳 */
+        .music-card {
+            background: white;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 350px; /* 稍微比播放器宽一点 */
+            height: 106px; /* 稍微比播放器高一点 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 鼠标悬停时的特效 */
+        .music-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        }
+
+        /* 修正 iframe 的对齐 */
+        iframe {
+            display: block;
+        }
+
+        /* 底部版权/页脚 */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #888;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
-    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=2725335189&auto=1&height=66"></iframe>
+
+    <header>
+        <h1>🎵 听点音乐吧</h1>
+        <p class="subtitle">与音乐死磕，才能与音乐言和</p>
+    </header>
+
+    <div class="music-container">
+        <!-- 珍珠 -->
+        <div class="music-card">
+            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="https://music.163.com/outchain/player?type=2&id=2725335189&auto=1&height=66"></iframe>
+        </div>
+        <div class="music-card">
+            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1963526955&auto=0&height=66"></iframe>
+        </div>
+        <!-- <div class="music-card">
+        </div> -->
+    </div>
+
+    <footer>
+        Hosted with ❤️ by ICOCOER
+    </footer>
+
 </body>
 </html>
- 
