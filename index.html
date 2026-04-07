@@ -3,148 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>听点音乐吧</title>
+    <title>ICOCOER — 个人主页</title>
     <style>
-        /* 页面整体重置与背景 */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        :root {
+            --accent: #4f6ef7;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+            --shadow-hover: 0 8px 32px rgba(79,110,247,0.18);
+        }
+
         body {
-            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* 淡雅的渐变背景 */
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+            background: var(--bg);
             min-height: 100vh;
-            padding: 40px 20px;
-            color: #333;
+            display: flex;
+            flex-direction: column;
+            color: var(--text);
         }
 
-        /* 标题样式 */
-        header {
+        .hero {
+            background: linear-gradient(135deg, #4f6ef7 0%, #a78bfa 100%);
+            color: #fff;
             text-align: center;
-            margin-bottom: 40px;
+            padding: 80px 20px 60px;
         }
 
-        h1 {
-            font-size: 2.5rem;
+        .hero-avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.6);
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
             font-weight: 700;
-            color: #2c3e50;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
 
-        p.subtitle {
+        .hero p {
             font-size: 1rem;
-            color: #666;
+            opacity: 0.85;
         }
 
-        /* 音乐容器：使用 Flexbox 自动换行 */
-        .music-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px; /* 播放器之间的间距 */
-            max-width: 1200px;
+        main {
+            flex: 1;
+            max-width: 960px;
+            width: 100%;
             margin: 0 auto;
+            padding: 56px 24px;
         }
 
-        /* 单个播放器卡片外壳 */
-        .music-card {
-            background: white;
-            padding: 10px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            width: 350px; /* 稍微比播放器宽一点 */
-            height: 106px; /* 稍微比播放器高一点 */
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .nav-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 24px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        /* 鼠标悬停时的特效 */
-        .music-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        .nav-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
         }
 
-        /* 修正 iframe 的对齐 */
-        iframe {
-            display: block;
-        }
+        .nav-card .card-icon { font-size: 2rem; line-height: 1; }
+        .nav-card .card-title { font-size: 1.1rem; font-weight: 600; }
+        .nav-card .card-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
+        .nav-card .card-arrow { margin-top: auto; font-size: 0.8rem; color: var(--accent); font-weight: 500; }
 
-        /* 底部版权/页脚 */
         footer {
             text-align: center;
-            margin-top: 50px;
-            color: #888;
+            padding: 24px;
+            color: var(--muted);
             font-size: 0.8rem;
+            border-top: 1px solid var(--border);
         }
+
+        footer a { color: inherit; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🎵 听点音乐吧</h1>
-        <p class="subtitle">与音乐死磕，才能与音乐言和</p>
-    </header>
-
-    <div class="music-container">
-        <!-- 珍珠 -->
-        <div class="music-card">
-            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="https://music.163.com/outchain/player?type=2&id=2725335189&auto=0&height=66"></iframe>
-        </div>
-        <div class="music-card">
-            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1963526955&auto=0&height=66"></iframe>
-        </div>
-        <!-- someone esle -->
-        <div class="music-card">
-            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=4937707&auto=0&height=66"></iframe>
-        </div>
-        <!-- <div class="music-card">
-        </div> -->
+    <div class="hero">
+        <img class="hero-avatar" src="avatar.jpg" alt="ICOCOER avatar" onerror="this.style.display='none'">
+        <h1>ICOCOER</h1>
+        <p>代码 · 文字 · 音乐</p>
     </div>
 
+    <main>
+        <p class="section-title">导航</p>
+        <div class="card-grid">
+
+            <a class="nav-card" href="https://blog.icocoer.top" target="_blank" rel="noopener noreferrer">
+                <span class="card-icon">✍️</span>
+                <span class="card-title">博客</span>
+                <span class="card-desc">我的想法、记录与技术文章。</span>
+                <span class="card-arrow">前往博客 →</span>
+            </a>
+
+            <a class="nav-card" href="docs.html">
+                <span class="card-icon">📚</span>
+                <span class="card-title">工具库文档</span>
+                <span class="card-desc">我开发的工具库的使用文档与 API 参考。</span>
+                <span class="card-arrow">查看文档 →</span>
+            </a>
+
+            <a class="nav-card" href="music.html">
+                <span class="card-icon">🎵</span>
+                <span class="card-title">听点音乐吧</span>
+                <span class="card-desc">与音乐死磕，才能与音乐言和。</span>
+                <span class="card-arrow">去听音乐 →</span>
+            </a>
+
+        </div>
+    </main>
+
     <footer>
-        Hosted with ❤️ by ICOCOER
+        Hosted with ❤️ by ICOCOER &nbsp;·&nbsp;
+        <a href="https://github.com/icocoer" target="_blank" rel="noopener noreferrer">GitHub</a>
     </footer>
-    <script>
-    // 记录上一次获得焦点的那个播放器
-    var lastFocusedIframe = null;
 
-    // 开启一个定时巡逻，每 200 毫秒（0.2秒）检查一次
-    setInterval(function() {
-        // 获取当前谁拿着“麦克风”（获得焦点的元素）
-        var currentElement = document.activeElement;
-
-        // 1. 判断当前拿着麦克风的是不是一个 iframe（播放器）
-        if (currentElement && currentElement.tagName === 'IFRAME') {
-            
-            // 2. 关键判断：如果当前的播放器，不是上一次记录的那个（说明用户刚切换了播放器）
-            if (currentElement !== lastFocusedIframe) {
-                
-                // 更新记录，标记它为最新的活跃播放器
-                lastFocusedIframe = currentElement;
-
-                // 3. 执行“清场”行动：把除了它以外的所有播放器都刷新（停止）
-                var allIframes = document.querySelectorAll('iframe');
-                allIframes.forEach(function(iframe) {
-                    // 只要不是当前正在点的这个，就重置
-                    if (iframe !== currentElement) {
-                        // 这里为了避免不必要的闪烁，可以加一个判断：
-                        // 只有当链接里没有 auto=0 的时候才强制加，或者直接刷新
-                        // 简单起见，直接刷新 src 来停止播放
-                        iframe.src = iframe.src;
-                    }
-                });
-            }
-        } else {
-            // 如果用户点到了网页空白处（不是 iframe），就把记录清空
-            // 这样用户下次再点同一个播放器时，也能触发检查（虽然通常不需要）
-            lastFocusedIframe = null;
-        }
-    }, 200); 
-</script>
 </body>
 </html>
