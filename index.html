@@ -4,155 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ICOCOER — 个人主页</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        :root {
-            --accent: #4f6ef7;
-            --bg: #f5f7fa;
-            --card-bg: #ffffff;
-            --text: #2c3e50;
-            --muted: #6b7280;
-            --border: #e5e7eb;
-            --shadow: 0 4px 24px rgba(0,0,0,0.08);
-            --shadow-hover: 0 8px 32px rgba(79,110,247,0.18);
-        }
-
-        body {
-            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
-            background: var(--bg);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: var(--text);
-        }
-
-        .hero {
-            background: linear-gradient(135deg, #4f6ef7 0%, #a78bfa 100%);
-            color: #fff;
-            text-align: center;
-            padding: 80px 20px 60px;
-        }
-
-        .hero-avatar {
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-            border: 4px solid rgba(255,255,255,0.6);
-            object-fit: cover;
-            margin-bottom: 20px;
-        }
-
-        .hero h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .hero p {
-            font-size: 1rem;
-            opacity: 0.85;
-        }
-
-        main {
-            flex: 1;
-            max-width: 960px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 56px 24px;
-        }
-
-        .section-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--muted);
-            margin-bottom: 20px;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px;
-        }
-
-        .nav-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px 24px;
-            text-decoration: none;
-            color: inherit;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .nav-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--accent);
-        }
-
-        .nav-card .card-icon { font-size: 2rem; line-height: 1; }
-        .nav-card .card-title { font-size: 1.1rem; font-weight: 600; }
-        .nav-card .card-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
-        .nav-card .card-arrow { margin-top: auto; font-size: 0.8rem; color: var(--accent); font-weight: 500; }
-
-        footer {
-            text-align: center;
-            padding: 24px;
-            color: var(--muted);
-            font-size: 0.8rem;
-            border-top: 1px solid var(--border);
-        }
-
-        footer a { color: inherit; }
-    </style>
+    <link rel="stylesheet" href="./assets/index.css">
+    <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </head>
 <body>
 
-    <div class="hero">
-        <img class="hero-avatar" src="avatar.jpg" alt="ICOCOER avatar" onerror="this.style.display='none'">
-        <h1>ICOCOER</h1>
-        <p>代码 · 文字 · 音乐</p>
+    <div class="page-shell">
+        <header class="hero">
+            <div class="hero-copy">
+                <p class="hero-kicker">ICOCOER</p>
+                <h1>Java、Minecraft 和音乐，正在慢慢连成一条线。</h1>
+                <p class="hero-lead">我是 icocoer，一个正在学习用代码创造魔法的 Minecraft 玩家，也是一名热爱用歌声表达情感的业余歌手。</p>
+                <div class="hero-actions">
+                    <a class="hero-button primary" href="views/document/document.html">进入文档页</a>
+                    <a class="hero-button secondary" href="views/music/music.html">去听音乐</a>
+                    <a class="hero-button secondary" href="https://github.com/icocoer" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </div>
+            </div>
+
+            <div class="hero-panel">
+                <img class="hero-avatar" src="assets/images/avatar/avatar.jpg" alt="ICOCOER avatar" onerror="this.style.display='none'">
+                <div class="hero-panel-label">当前侧重</div>
+                <div class="hero-panel-title">把代码里的逻辑感，和音乐里的表达欲，放进同一条成长线里。</div>
+                <ul class="hero-points">
+                    <li>Java 与 Minecraft Mod 开发</li>
+                    <li>练习歌声与情绪表达</li>
+                    <li>把记录整理进文档站</li>
+                </ul>
+            </div>
+        </header>
+
+        <main>
+            <section class="signal-strip">
+                <div class="signal-item">
+                    <span class="signal-label">一句话</span>
+                    <p>也许代码是冰冷的，但音乐永远是温暖的。</p>
+                </div>
+                <div class="signal-item badge-item">
+                    <div class="visit-stats" aria-label="站点访问统计">
+                        <span class="visit-chip" id="busuanzi_container_site_pv">
+                            总访问
+                            <strong id="busuanzi_value_site_pv">--</strong>
+                        </span>
+                        <span class="visit-chip" id="busuanzi_container_site_uv">
+                            访客数
+                            <strong id="busuanzi_value_site_uv">--</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="signal-item signal-links">
+                    <a href="https://space.bilibili.com/115476220" target="_blank" rel="noopener noreferrer">Bilibili</a>
+                    <a href="mailto:icocoer@hotmail.com">Email</a>
+                    <a href="https://music.163.com/#/user/home?id=1414491677" target="_blank" rel="noopener noreferrer">网易云音乐</a>
+                </div>
+            </section>
+
+            <section class="section-block">
+                <p class="section-title">正在做的事</p>
+                <div class="card-grid">
+                    <article class="info-card">
+                        <div class="card-icon">🎵</div>
+                        <h2>关于我的歌声</h2>
+                        <p>我相信每一首歌都有自己的故事，现在还在练习气息、音准和表达，希望能唱出更动人的旋律。</p>
+                        <ul>
+                            <li>练习呼吸与音准稳定性</li>
+                            <li>理解旋律、编排和情绪变化</li>
+                            <li>偶尔记录真正打动我的片段</li>
+                        </ul>
+                    </article>
+
+                    <article class="info-card info-card-highlight">
+                        <div class="card-icon">🧱</div>
+                        <h2>关于 Minecraft Mod 开发</h2>
+                        <p>我痴迷于在 Minecraft 的世界里增加新的可能。目前主要在学 Java，也在摸 Forge / Fabric API，目标是做出一个真正属于自己的 Mod。</p>
+                        <ul>
+                            <li>学习 Java，补足基础</li>
+                            <li>捣鼓 Forge / Fabric API</li>
+                            <li>积累一些有趣的 Mod 创意</li>
+                        </ul>
+                        <code class="inline-quote">System.out.println("Hello, Minecraft World!");</code>
+                    </article>
+
+                    <article class="info-card">
+                        <div class="card-icon">📚</div>
+                        <h2>关于这个站</h2>
+                        <p>上班摸鱼时用ai做的小站</p>
+                        <ul>
+                            <li>记录一些随手的想法和实验</li>
+                            <li>打发无聊时间</li>
+                            <li>尝试新的创意和工具</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+        </main>
     </div>
-
-    <main>
-        <p class="section-title">导航</p>
-        <div class="card-grid">
-
-            <a class="nav-card" href="https://blog.icocoer.top" target="_blank" rel="noopener noreferrer">
-                <span class="card-icon">✍️</span>
-                <span class="card-title">博客</span>
-                <span class="card-desc">我的想法、记录与技术文章。</span>
-                <span class="card-arrow">前往博客 →</span>
-            </a>
-
-            <a class="nav-card" href="docs.html">
-                <span class="card-icon">📚</span>
-                <span class="card-title">工具库文档</span>
-                <span class="card-desc">我开发的工具库的使用文档与 API 参考。</span>
-                <span class="card-arrow">查看文档 →</span>
-            </a>
-
-            <a class="nav-card" href="music.html">
-                <span class="card-icon">🎵</span>
-                <span class="card-title">听点音乐吧</span>
-                <span class="card-desc">与音乐死磕，才能与音乐言和。</span>
-                <span class="card-arrow">去听音乐 →</span>
-            </a>
-
-        </div>
-    </main>
 
     <footer>
         Hosted with ❤️ by ICOCOER &nbsp;·&nbsp;
