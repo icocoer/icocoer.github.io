@@ -57,6 +57,12 @@ body {
 
 .sidebar-header a:hover { text-decoration: underline; }
 
+.sidebar-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
 .sidebar-title {
     font-size: 1rem;
     font-weight: 700;

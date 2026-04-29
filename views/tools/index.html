@@ -3,50 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>听点音乐吧 — ICOCOER</title>
+    <title>工具导航 — ICOCOER</title>
     <link rel="icon" href="../../favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="../../assets/images/favicon-32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="../../assets/images/favicon-48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="../../assets/images/apple-touch-icon.png">
-    <link rel="stylesheet" href="music.css">
+    <link rel="stylesheet" href="./tools.css">
 </head>
 <body>
     <div class="page-shell">
         <div class="page-nav">
             <a class="back-link" href="../../index.html">← 返回首页</a>
             <a class="nav-link-pill" href="../document/document.html">文档页</a>
-            <a class="nav-link-pill" href="../tools/index.html">工具导航</a>
+            <a class="nav-link-pill" href="../music/music.html">音乐页</a>
         </div>
 
         <header class="hero-card">
             <div class="hero-copy">
-                <p class="eyebrow">Music Room</p>
-                <h1>留一页给旋律，也留一页给情绪。</h1>
-                <p class="subtitle">这里放的是我最近想循环、想记住，或者单纯觉得该留下来的歌。</p>
+                <p class="eyebrow">Tools</p>
+                <h1>给常用工具一个家。</h1>
+                <p class="subtitle">这个页面是一些零散小工具的集合。</p>
             </div>
 
             <div class="hero-note">
-                <span class="note-label">当前状态</span>
-                <p>与音乐死磕，才能与音乐言和。</p>
+                <span class="note-label">当前用途</span>
+                <p>给站里那些零散的小工具，做一个统一入口。</p>
                 <ul>
-                    <li>歌从四方而来</li>
-                    <li>心随旋律起舞</li>
-                    <li>情随音符流动</li>
+                    <li>本地工具与外链工具都能收</li>
+                    <li>工具都经过本人挑选</li>
+                    <li>持续更新中，敬请期待</li>
                 </ul>
             </div>
         </header>
 
-        <section class="playlist-panel">
+        <section class="tools-panel">
             <div class="section-head">
                 <div>
-                    <p class="eyebrow">Playlist</p>
-                    <h2>最近想放在这里的声音</h2>
+                    <p class="eyebrow">Directory</p>
+                    <h2>现在已经挂上的工具</h2>
                 </div>
-                <p class="section-tip" id="music-count">加载中...</p>
+                <p class="section-tip" id="tool-count">加载中...</p>
             </div>
 
-            <div class="music-grid" id="music-list" aria-live="polite"></div>
-            <div class="empty-state" id="music-empty" hidden>歌单暂时没有加载出来，稍后再试。</div>
+            <div class="tools-grid" id="tool-list" aria-live="polite"></div>
+            <div class="empty-state" id="tool-empty" hidden>工具列表暂时没有加载出来，稍后再试。</div>
         </section>
 
         <footer>
@@ -54,6 +54,6 @@
         </footer>
     </div>
 
-    <script type="module" src="music.js"></script>
+    <script type="module" src="./tools.js"></script>
 </body>
 </html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>云音乐格式转换工具</title>
+    <meta name="description" content="浏览器本地完成云音乐格式转换，无需上传文件，支持批量预览与下载。">
+    <link href="./bootstrap.css" rel="stylesheet">
+    <link href="./site.css" rel="stylesheet">
+    <link href="./app.css" rel="stylesheet">
+    <script src="./jquery.js"></script>
+    <script src="./yii.js"></script>
+</head>
+<body>
+<div class="wrap app-shell">
+    <nav class="navbar navbar-default navbar-fixed-top app-navbar">
+        <div class="container">
+            <div class="navbar-header">
+                <span class="navbar-brand app-brand">本地音乐格式转换</span>
+            </div>
+            <div class="nav navbar-nav navbar-right app-nav-copy">
+                <p class="navbar-text">文件仅在当前浏览器处理，不会上传到服务器</p>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <script>
+var funcky_key = "key";
+        </script>
+
+        <div class="site-index" id="site-index">
+            <div class="welcom-title hero-panel">
+                <h1>云音乐格式转换工具</h1>
+                <p>单页应用，浏览器本地转换，无需上传，支持批量处理。</p>
+                <p>选择文件后即可预览、试听并导出常见音频格式。</p>
+            </div>
+
+            <div class="body-content">
+                <div id="convert-button-container">
+                    <span class="btn btn-primary fileinput-button">
+                        <span class="fileinput-btn-span">选择文件开始转换（支持多选）</span>
+                        <input id="upload" type="file" name="files[]" accept=".ncm,.uc,.kwm,.xm,.wav,.mp3,.flac,.m4a,.ogg,.tm0,.tm3,.qmc3,.qmc2,.qmc0,.qmcflac,.qmcogg,.tkm,.bkcmp3,.bkcm4a,.bkcflac,.bkcwav,.bkcape,.bkcogg,.bkcwma,.mggl,.mflac,.mflac0,.mgg,.mgg1,.mgg0,.666c6163,.6d7033,.6f6767,.6d3461,.776176,.tm2,.tm6,.cache,.vpr,.kgm,.kgma" multiple>
+                    </span>
+                </div>
+
+                <div id="download-all-btn-container" class="action-panel">
+                    <div class="action-copy">
+                        <span>支持批量下载、ZIP 打包和清空当前列表。</span>
+                    </div>
+                    <button onclick="downloadAll()" type="button" class="btn btn-success">
+                        <span>下载全部</span>
+                    </button>
+                    <button onclick="downloadZip()" type="button" class="btn btn-success">
+                        <span>生成 ZIP</span>
+                    </button>
+                    <button onclick="deletedAll()" type="button" class="btn btn-danger delete">
+                        <span>删除全部</span>
+                    </button>
+                    <div id="zip-status"></div>
+                </div>
+
+                <table id="res-table" class="table table-striped"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer-container app-footer">
+    <div class="container">
+        <p>本页仅执行本地文件读取、解密、封面处理与导出。</p>
+        <p><a href="https://openyyy.com/" target="_blank" rel="noopener noreferrer">访问 OpenYYY</a></p>
+    </div>
+</footer>
+
+<script src="./metaflac.js"></script>
+<script src="./jsmediatags.min.js"></script>
+<script src="./decrypt.js"></script>
+<script src="./aes.js"></script>
+<script src="./zip.js"></script>
+<script src="./id3.js"></script>
+<script src="./script.js"></script>
+<script src="./bootstrap.js"></script>
+<script>
+$(document).ready(function () {
+    $("#page-loading").fadeOut(1500, function () {
+        var pageLoadingDiv = document.getElementById("page-loading");
+        if (pageLoadingDiv && pageLoadingDiv.parentNode) {
+            pageLoadingDiv.parentNode.removeChild(pageLoadingDiv);
+        }
+    });
+
+    if (typeof checkBrowser === "function") {
+        checkBrowser();
+        document.getElementById("upload").addEventListener("change", handleFileSelect, false);
+    } else {
+        var div = document.createElement("div");
+        div.id = "may-not-work-container";
+        div.className = "alert alert-warning";
+        div.insertAdjacentHTML("beforeend", "<strong>提示：</strong> 您的浏览器可能不能使用本站功能，请尝试电脑端最新版 Chrome 或 Firefox。");
+        $("#site-index").append(div);
+    }
+});
+</script>
+</body>
+</html>
