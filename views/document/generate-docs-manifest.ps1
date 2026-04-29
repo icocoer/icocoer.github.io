@@ -37,6 +37,20 @@ function Get-MarkdownTitle {
     return Convert-NameToTitle ([System.IO.Path]::GetFileNameWithoutExtension($FilePath))
 }
 
+function Get-GeneratedAt {
+    param([string]$DocsRoot)
+
+    $latestMarkdown = Get-ChildItem -LiteralPath $DocsRoot -Recurse -File -Filter '*.md' |
+        Sort-Object LastWriteTimeUtc -Descending |
+        Select-Object -First 1
+
+    if ($latestMarkdown) {
+        return $latestMarkdown.LastWriteTimeUtc.ToString('yyyy-MM-ddTHH:mm:ssZ')
+    }
+
+    return (Get-Item -LiteralPath $DocsRoot).LastWriteTimeUtc.ToString('yyyy-MM-ddTHH:mm:ssZ')
+}
+
 function Build-Tree {
     param(
         [string]$DirectoryPath,
@@ -81,7 +95,7 @@ if (-not (Test-Path -LiteralPath $DocsRoot)) {
 }
 
 $manifest = [ordered]@{
-    generatedAt = (Get-Date).ToString('s')
+    generatedAt = Get-GeneratedAt -DocsRoot $DocsRoot
     items = Build-Tree -DirectoryPath $DocsRoot
 }
 

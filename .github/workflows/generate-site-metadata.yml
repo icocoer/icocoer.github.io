@@ -1,0 +1,42 @@
+name: Generate Site Metadata
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate docs manifest
+        shell: pwsh
+        run: ./views/document/generate-docs-manifest.ps1
+
+      - name: Generate sitemap
+        shell: pwsh
+        run: ./generate-sitemap.ps1
+
+      - name: Commit generated files
+        run: |
+          if git diff --quiet -- sitemap.xml views/document/docs-manifest.json; then
+            echo "No metadata changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sitemap.xml views/document/docs-manifest.json
+          git commit -m "chore: update generated site metadata [skip ci]"
+          git push
