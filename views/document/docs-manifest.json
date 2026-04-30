@@ -1,33 +1,33 @@
 ﻿{
-  "generatedAt": "2026-04-30T01:02:20Z",
-  "items": [
-    {
-      "type": "dir",
-      "name": "examples",
-      "title": "Examples",
-      "path": "docs/examples",
-      "children": [
-        {
-          "type": "file",
-          "name": "markdown-showcase",
-          "title": "Markdown 能力演示",
-          "path": "docs/examples/markdown-showcase.md"
-        }
-      ]
-    },
-    {
-      "type": "dir",
-      "name": "linux",
-      "title": "Linux",
-      "path": "docs/linux",
-      "children": [
-        {
-          "type": "file",
-          "name": "ubuntu免密使用sudo",
-          "title": "Ubuntu免密使用sudo",
-          "path": "docs/linux/ubuntu免密使用sudo.md"
-        }
-      ]
-    }
-  ]
+    "generatedAt":  "2026-04-30T01:11:33Z",
+    "items":  [
+                  {
+                      "type":  "dir",
+                      "name":  "examples",
+                      "title":  "Examples",
+                      "path":  "docs/examples",
+                      "children":  [
+                                       {
+                                           "type":  "file",
+                                           "name":  "markdown-showcase",
+                                           "title":  "Markdown 能力演示",
+                                           "path":  "docs/examples/markdown-showcase.md"
+                                       }
+                                   ]
+                  },
+                  {
+                      "type":  "dir",
+                      "name":  "linux",
+                      "title":  "Linux",
+                      "path":  "docs/linux",
+                      "children":  [
+                                       {
+                                           "type":  "file",
+                                           "name":  "ubuntu免密使用sudo",
+                                           "title":  "Ubuntu 免密使用 sudo",
+                                           "path":  "docs/linux/ubuntu免密使用sudo.md"
+                                       }
+                                   ]
+                  }
+              ]
 }

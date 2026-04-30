@@ -142,6 +142,21 @@ function resolveAssetUrl(url) {
         return url;
     }
 
+    if (url.startsWith('/')) {
+        const previewPrefix = location.pathname.startsWith('/site-preview/') ? '/site-preview' : '';
+        return new URL(`${previewPrefix}${url}`, location.origin).toString();
+    }
+
+    // Bare asset paths resolve to a mirrored folder under /assets/docs/<doc-path-without-ext>/.
+    if (!/^(?:[./]|\/)/.test(url) && !url.startsWith('assets/') && !url.startsWith('docs/')) {
+        const docRelativePath = currentDocPath.startsWith('docs/') ? currentDocPath.slice('docs/'.length) : currentDocPath;
+        const docAssetFolder = docRelativePath.replace(/\.md$/i, '');
+
+        if (docAssetFolder) {
+            return new URL(`../../assets/docs/${docAssetFolder}/${url}`, viewerBaseUrl).toString();
+        }
+    }
+
     return new URL(url, new URL(currentDocPath, viewerBaseUrl)).toString();
 }
 

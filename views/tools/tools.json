@@ -1,13 +1,17 @@
 {
-    "tools": [
-        {
-            "title": "云音乐格式转换",
-            "description": "浏览器本地完成云音乐格式转换，无需上传文件，支持批量预览、下载和 ZIP 打包。",
-            "kind": "本地工具",
-            "href": "./openyyy/index.html",
-            "actionText": "打开工具",
-            "external": false,
-            "tags": ["音频", "转换", "本地处理"]
-        }
-    ]
+  "tools": [
+    {
+      "title": "云音乐格式转换",
+      "description": "浏览器本地完成云音乐格式转换，无需上传文件，支持批量预览、下载和 ZIP 打包。",
+      "kind": "本地工具",
+      "href": "./openyyy/index.html",
+      "actionText": "打开工具",
+      "external": false,
+      "tags": [
+        "音频",
+        "转换",
+        "本地处理"
+      ]
+    }
+  ]
 }

@@ -257,6 +257,69 @@ body {
     margin: 16px 0 20px;
 }
 
+#markdown-body .pic-center,
+#markdown-body #pic-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#markdown-body .pic-left,
+#markdown-body #pic-left {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+#markdown-body .pic-right,
+#markdown-body #pic-right {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+#markdown-body .pic-full,
+#markdown-body #pic-full {
+    width: 100%;
+}
+
+#markdown-body .pic-sm,
+#markdown-body #pic-sm {
+    width: min(320px, 100%);
+}
+
+#markdown-body .pic-md,
+#markdown-body #pic-md {
+    width: min(520px, 100%);
+}
+
+#markdown-body .pic-lg,
+#markdown-body #pic-lg {
+    width: min(760px, 100%);
+}
+
+#markdown-body .pic-xl,
+#markdown-body #pic-xl {
+    width: min(920px, 100%);
+}
+
+#markdown-body .pic-shadow,
+#markdown-body #pic-shadow {
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+}
+
+#markdown-body .pic-border,
+#markdown-body #pic-border {
+    border: 1px solid var(--border);
+}
+
+#markdown-body .pic-plain,
+#markdown-body #pic-plain {
+    border-radius: 0;
+}
+
+#markdown-body .pic-round,
+#markdown-body #pic-round {
+    border-radius: 24px;
+}
+
 #markdown-body code {
     background: var(--code-bg);
     border: 1px solid var(--border);
