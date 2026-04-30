@@ -1,5 +1,5 @@
 ﻿{
-  "generatedAt": "2026-04-29T02:46:57Z",
+  "generatedAt": "2026-04-30T01:02:20Z",
   "items": [
     {
       "type": "dir",
@@ -17,57 +17,15 @@
     },
     {
       "type": "dir",
-      "name": "test1",
-      "title": "Test1",
-      "path": "docs/test1",
+      "name": "linux",
+      "title": "Linux",
+      "path": "docs/linux",
       "children": [
         {
           "type": "file",
-          "name": "t1",
-          "title": "T1",
-          "path": "docs/test1/t1.md"
-        },
-        {
-          "type": "dir",
-          "name": "test2",
-          "title": "Test2",
-          "path": "docs/test1/test2",
-          "children": [
-            {
-              "type": "file",
-              "name": "中文测试",
-              "title": "中文测试",
-              "path": "docs/test1/test2/中文测试.md"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "dir",
-      "name": "中文测试2",
-      "title": "中文测试2",
-      "path": "docs/中文测试2",
-      "children": [
-        {
-          "type": "file",
-          "name": "cc1",
-          "title": "Cc1",
-          "path": "docs/中文测试2/cc1.md"
-        }
-      ]
-    },
-    {
-      "type": "dir",
-      "name": "工作流测试",
-      "title": "工作流测试",
-      "path": "docs/工作流测试",
-      "children": [
-        {
-          "type": "file",
-          "name": "test2222",
-          "title": "test",
-          "path": "docs/工作流测试/test2222.md"
+          "name": "ubuntu免密使用sudo",
+          "title": "Ubuntu免密使用sudo",
+          "path": "docs/linux/ubuntu免密使用sudo.md"
         }
       ]
     }
