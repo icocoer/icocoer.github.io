@@ -13,12 +13,15 @@ const sidebarNav = document.querySelector('.sidebar-nav');
 const tocNav = document.getElementById('toc-nav');
 const mobileSidebar = document.getElementById('sidebar');
 const menuToggle = document.getElementById('menu-toggle');
+const sidebarCollapse = document.getElementById('sidebar-collapse');
+const docSearch = document.getElementById('doc-search');
 const viewerBaseUrl = new URL('./', location.href);
 
 let currentDocPath = '';
 let currentHeadingId = '';
 let manifestItems = [];
 let navLinksByPath = new Map();
+let flattenedDocs = [];
 let tocObserver = null;
 let tocHeadings = [];
 
@@ -297,6 +300,54 @@ function renderSidebar(items) {
     sidebarNav.appendChild(renderNavTree(items));
 }
 
+function flattenDocs(items, parents = []) {
+    return items.flatMap(item => {
+        if (item.type === 'dir') {
+            return flattenDocs(item.children || [], [...parents, item.title]);
+        }
+
+        return [{
+            title: item.title,
+            path: item.path,
+            searchText: [...parents, item.title, item.path].join(' ').toLowerCase()
+        }];
+    });
+}
+
+function filterSidebar(query) {
+    const keyword = query.trim().toLowerCase();
+
+    if (!keyword) {
+        renderSidebar(manifestItems);
+        updateActiveNav(currentDocPath);
+        return;
+    }
+
+    const matches = flattenedDocs.filter(item => item.searchText.includes(keyword));
+    navLinksByPath = new Map();
+    sidebarNav.innerHTML = '';
+
+    if (matches.length === 0) {
+        sidebarNav.innerHTML = '<p class="nav-empty">没有找到匹配的文档</p>';
+        return;
+    }
+
+    const container = document.createElement('div');
+    container.className = 'nav-tree';
+    matches.forEach(item => {
+        const link = document.createElement('a');
+        link.className = 'nav-link';
+        link.href = buildDocumentUrl(item.path);
+        link.textContent = item.title;
+        link.dataset.doc = item.path;
+        navLinksByPath.set(item.path, link);
+        container.appendChild(link);
+    });
+
+    sidebarNav.appendChild(container);
+    updateActiveNav(currentDocPath);
+}
+
 function findFirstDoc(items) {
     for (const item of items) {
         if (item.type === 'file') {
@@ -369,7 +420,7 @@ function buildToc() {
         tocObserver = null;
     }
 
-    const headings = Array.from(body.querySelectorAll('h1[id], h2[id], h3[id]'));
+    const headings = Array.from(body.querySelectorAll('h1[id], h2[id], h3[id], h4[id]'));
     tocHeadings = headings;
     tocNav.innerHTML = '';
 
@@ -476,6 +527,13 @@ function toggleSidebar() {
     mobileSidebar.classList.toggle('open');
 }
 
+function setSidebarCollapsed(collapsed) {
+    document.body.classList.toggle('sidebar-collapsed', collapsed);
+    sidebarCollapse.setAttribute('aria-label', collapsed ? '展开左侧导航' : '收起左侧导航');
+    sidebarCollapse.title = collapsed ? '展开左侧导航' : '收起左侧导航';
+    localStorage.setItem('documentSidebarCollapsed', collapsed ? '1' : '0');
+}
+
 body.addEventListener('click', event => {
     const link = event.target.closest('a[data-doc-link]');
     if (!link) {
@@ -514,6 +572,22 @@ tocNav.addEventListener('click', event => {
 
 menuToggle.addEventListener('click', toggleSidebar);
 
+sidebarCollapse.addEventListener('click', () => {
+    setSidebarCollapsed(!document.body.classList.contains('sidebar-collapsed'));
+});
+
+docSearch.addEventListener('input', event => {
+    filterSidebar(event.target.value);
+});
+
+window.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        docSearch.focus();
+        docSearch.select();
+    }
+});
+
 async function loadManifest() {
     const response = await fetch('docs-manifest.json');
     if (!response.ok) {
@@ -525,8 +599,11 @@ async function loadManifest() {
 
 async function initializeDocs() {
     try {
+        setSidebarCollapsed(localStorage.getItem('documentSidebarCollapsed') === '1');
+
         const manifest = await loadManifest();
         manifestItems = manifest.items || [];
+        flattenedDocs = flattenDocs(manifestItems);
         renderSidebar(manifestItems);
 
         const state = readLocationState();

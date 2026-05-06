@@ -20,14 +20,27 @@
 
     <button id="menu-toggle" type="button" aria-label="Toggle menu">☰</button>
 
+    <header id="topbar">
+        <div class="brand-area">
+            <a class="brand" href="../../index.html">ICOCOER 文档</a>
+            <button id="sidebar-collapse" type="button" aria-label="收起左侧导航" title="收起左侧导航">‹</button>
+        </div>
+        <div class="doc-search">
+            <span class="search-icon">⌕</span>
+            <input id="doc-search" type="search" placeholder="搜索文档" autocomplete="off">
+            <kbd>Ctrl</kbd><kbd>K</kbd>
+        </div>
+        <nav class="top-nav" aria-label="主导航">
+            <a href="../../index.html">首页</a>
+            <a href="../tools/index.html">工具</a>
+            <a href="../music/music.html">音乐</a>
+        </nav>
+    </header>
+
     <nav id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-links">
-                <a href="../../index.html">← 返回首页</a>
-                <a href="../tools/index.html">工具导航</a>
-                <a href="../music/music.html">去听音乐</a>
-            </div>
-            <div class="sidebar-title">📚 文档</div>
+            <div class="sidebar-title">文档目录</div>
+            <p class="sidebar-subtitle">按主题浏览所有笔记</p>
         </div>
         <div class="sidebar-nav">
             <p class="loading">加载目录中…</p>
@@ -42,7 +55,7 @@
 
             <aside id="toc-panel">
                 <div class="toc-card">
-                    <div class="toc-title">本页内容</div>
+                    <div class="toc-title">此页内容</div>
                     <nav id="toc-nav">
                         <p class="toc-empty">当前页没有可用标题</p>
                     </nav>
