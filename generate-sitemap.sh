@@ -77,7 +77,7 @@ while IFS= read -r -d '' file_path; do
     relative_path="${file_path#$REPO_ROOT/}"
     web_path="$(to_web_path "$relative_path")"
     entries+=("${SITE_URL}${web_path}|$(iso_utc "$file_path")")
-done < <(find "$REPO_ROOT" -type f -name '*.html' ! -name '404.html' -print0 | sort -z)
+done < <(find "$REPO_ROOT" -type f -name '*.html' ! -name '404.html' ! -path "$REPO_ROOT/site-admin/*" -print0 | sort -z)
 
 DOCS_ROOT="$REPO_ROOT/views/document/docs"
 DOCS_BASE="$REPO_ROOT/views/document/"

@@ -42,16 +42,18 @@ function Get-RelativePath {
     $resolvedFullPath = (Resolve-Path -LiteralPath $FullPath).Path
 
     if ($resolvedFullPath.StartsWith($resolvedBasePath, [System.StringComparison]::OrdinalIgnoreCase)) {
-        return (($resolvedFullPath.Substring($resolvedBasePath.Length) -replace '^[\\/]+', '')).Replace('\\', '/')
+        return (($resolvedFullPath.Substring($resolvedBasePath.Length) -replace '^[\\/]+', '')).Replace('\', '/')
     }
 
     $baseUri = [System.Uri]($resolvedBasePath + '\\')
     $fullUri = [System.Uri]$resolvedFullPath
-    return $baseUri.MakeRelativeUri($fullUri).ToString().Replace('\\', '/')
+    return $baseUri.MakeRelativeUri($fullUri).ToString().Replace('\', '/')
 }
 
 function Convert-ToWebPath {
     param([string]$RelativePath)
+
+    $RelativePath = $RelativePath.Replace('\', '/')
 
     if ($RelativePath -eq 'index.html') {
         return '/'
@@ -67,6 +69,7 @@ function Convert-ToWebPath {
 function Get-MarkdownViewerUrl {
     param([string]$RelativeDocPath)
 
+    $RelativeDocPath = $RelativeDocPath.Replace('\', '/')
     $escapedDocPath = [System.Uri]::EscapeDataString($RelativeDocPath)
     return "/views/document/document.html?doc=$escapedDocPath"
 }
@@ -90,7 +93,10 @@ $OutputPath = Get-OutputPath -RepoRootPath $RepoRoot -Override $OutputPath
 $entries = New-Object System.Collections.Generic.List[object]
 
 $htmlFiles = Get-ChildItem -LiteralPath $RepoRoot -Recurse -File -Filter '*.html' |
-    Where-Object { $_.Name -ne '404.html' }
+    Where-Object {
+        $_.Name -ne '404.html' -and
+        (Get-RelativePath -BasePath $RepoRoot -FullPath $_.FullName).Replace('\', '/') -notlike 'site-admin/*'
+    }
 
 foreach ($file in $htmlFiles) {
     $relativePath = Get-RelativePath -BasePath $RepoRoot -FullPath $file.FullName
