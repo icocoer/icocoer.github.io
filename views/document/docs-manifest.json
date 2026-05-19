@@ -1,5 +1,5 @@
 ﻿{
-  "generatedAt": "2026-05-06T08:53:22Z",
+  "generatedAt": "2026-05-19T06:24:03Z",
   "items": [
     {
       "type": "dir",
@@ -26,6 +26,12 @@
           "name": "ubuntu免密使用sudo",
           "title": "Ubuntu 免密使用 sudo",
           "path": "docs/linux/ubuntu免密使用sudo.md"
+        },
+        {
+          "type": "file",
+          "name": "ubuntu启动时自动执行命令",
+          "title": "ubuntu启动时自动执行命令",
+          "path": "docs/linux/ubuntu启动时自动执行命令.md"
         }
       ]
     }
