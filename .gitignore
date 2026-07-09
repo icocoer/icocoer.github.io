@@ -1,2 +1,4 @@
 site-admin
 .vscode
+.venv
+.mimocode

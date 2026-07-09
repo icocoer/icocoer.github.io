@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="music.css">
 </head>
 <body>
-    <div class="page-shell">
+    <div class="page-shell" id="app">
         <div class="page-nav">
             <a class="back-link" href="../../index.html">← 返回首页</a>
             <a class="nav-link-pill" href="../document/document.html">文档页</a>
@@ -46,11 +46,38 @@
                     <p class="eyebrow">Playlist</p>
                     <h2>最近想放在这里的声音</h2>
                 </div>
-                <p class="section-tip" id="music-count">加载中...</p>
+                <p class="section-tip">{{ loaded ? '共 ' + tracks.length + ' 首曲目' : '加载中...' }}</p>
             </div>
 
-            <div class="music-grid" id="music-list" aria-live="polite"></div>
-            <div class="empty-state" id="music-empty" hidden>歌单暂时没有加载出来，稍后再试。</div>
+            <div class="music-grid" aria-live="polite">
+                <article class="music-card" v-for="track in tracks" :key="track.songId">
+                    <div class="music-meta">
+                        <div>
+                            <span class="music-tag">{{ track.tag || '单曲' }}</span>
+                            <h3>{{ track.title }}</h3>
+                            <p class="music-artist">{{ track.artist }}</p>
+                            <p class="music-note" v-if="track.note">{{ track.note }}</p>
+                        </div>
+                    </div>
+                    <div class="player-shell">
+                        <iframe
+                            frameborder="no"
+                            border="0"
+                            marginwidth="0"
+                            marginheight="0"
+                            width="330"
+                            height="86"
+                            loading="lazy"
+                            allow="autoplay"
+                            :src="playerUrl(track.songId)"
+                            :title="track.title + ' - ' + track.artist"
+                        ></iframe>
+                    </div>
+                </article>
+            </div>
+
+            <div class="empty-state" v-if="loaded && tracks.length === 0">歌单暂时没有加载出来，稍后再试。</div>
+            <div class="empty-state" v-if="error">{{ error }}</div>
         </section>
 
         <footer>
@@ -58,6 +85,7 @@
         </footer>
     </div>
 
-    <script type="module" src="music.js"></script>
+    <script src="../../assets/js/vue.js"></script>
+    <script src="music.js"></script>
 </body>
 </html>

@@ -8,22 +8,7 @@ import DOMPurify from 'https://esm.sh/dompurify@3.2.4';
 import hljs from 'https://esm.sh/highlight.js@11.11.1/lib/common';
 import mermaid from 'https://esm.sh/mermaid@11.6.0';
 
-const body = document.getElementById('markdown-body');
-const sidebarNav = document.querySelector('.sidebar-nav');
-const tocNav = document.getElementById('toc-nav');
-const mobileSidebar = document.getElementById('sidebar');
-const menuToggle = document.getElementById('menu-toggle');
-const sidebarCollapse = document.getElementById('sidebar-collapse');
-const docSearch = document.getElementById('doc-search');
-const viewerBaseUrl = new URL('./', location.href);
-
-let currentDocPath = '';
-let currentHeadingId = '';
-let manifestItems = [];
-let navLinksByPath = new Map();
-let flattenedDocs = [];
-let tocObserver = null;
-let tocHeadings = [];
+const { createApp, ref, computed, watch, nextTick, onMounted, onUnmounted, provide, inject } = Vue;
 
 mermaid.initialize({
     startOnLoad: false,
@@ -31,78 +16,46 @@ mermaid.initialize({
     theme: 'default'
 });
 
+// ── 工具函数 ──
+
 function slugifyHeading(text) {
-    return String(text)
-        .trim()
-        .toLowerCase()
+    return String(text).trim().toLowerCase()
         .replace(/[^\w\u4e00-\u9fa5\s-]/g, '')
         .replace(/\s+/g, '-');
 }
 
 function escapeHtml(value) {
     return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+        .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
-function preserveBlockMath(markdownSource) {
+function preserveBlockMath(md) {
     const blocks = [];
-    const protectedSource = markdownSource.replace(/\$\$([\s\S]*?)\$\$/g, match => {
+    const src = md.replace(/\$\$([\s\S]*?)\$\$/g, match => {
         const token = `@@BLOCK_MATH_${blocks.length}@@`;
         blocks.push({ token, value: match.slice(2, -2).trim() });
         return token;
     });
-
-    return { protectedSource, blocks };
+    return { src, blocks };
 }
 
-function restoreBlockMath(renderedHtml, blocks) {
-    let restoredHtml = renderedHtml;
-
+function restoreBlockMath(html, blocks) {
+    let out = html;
     blocks.forEach(({ token, value }) => {
-        const placeholder = `<div class="block-math" data-math="${encodeURIComponent(value)}"></div>`;
-        restoredHtml = restoredHtml.replace(`<p>${token}</p>`, placeholder);
-        restoredHtml = restoredHtml.replace(token, placeholder);
+        const ph = `<div class="block-math" data-math="${encodeURIComponent(value)}"></div>`;
+        out = out.replace(`<p>${token}</p>`, ph).replace(token, ph);
     });
-
-    return restoredHtml;
-}
-
-function renderBlockMath() {
-    if (!window.katex?.render) {
-        return;
-    }
-
-    body.querySelectorAll('.block-math').forEach(node => {
-        const expression = node.dataset.math ? decodeURIComponent(node.dataset.math) : '';
-        window.katex.render(expression, node, {
-            displayMode: true,
-            throwOnError: false
-        });
-    });
+    return out;
 }
 
 function isExternalUrl(url) {
     return /^(?:[a-z]+:)?\/\//i.test(url) || /^(?:mailto:|tel:|data:)/i.test(url);
 }
 
-function isHashOnly(url) {
-    return url.startsWith('#');
-}
-
 function splitHref(url) {
-    const hashIndex = url.indexOf('#');
-    if (hashIndex === -1) {
-        return { path: url, anchor: '' };
-    }
-
-    return {
-        path: url.slice(0, hashIndex),
-        anchor: decodeURIComponent(url.slice(hashIndex + 1))
-    };
+    const i = url.indexOf('#');
+    return i === -1 ? { path: url, anchor: '' } : { path: url.slice(0, i), anchor: decodeURIComponent(url.slice(i + 1)) };
 }
 
 function buildDocumentUrl(docPath, heading = '') {
@@ -110,84 +63,56 @@ function buildDocumentUrl(docPath, heading = '') {
 }
 
 function readLocationState() {
-    const params = new URLSearchParams(location.search);
-    return {
-        doc: params.get('doc') || '',
-        heading: decodeURIComponent(location.hash.slice(1))
-    };
+    const p = new URLSearchParams(location.search);
+    return { doc: p.get('doc') || '', heading: decodeURIComponent(location.hash.slice(1)) };
 }
+
+function isHashOnly(url) { return url.startsWith('#'); }
+
+// ── Markdown-it 配置 ──
+
+let currentDocPath = '';
+const viewerBaseUrl = new URL('./', location.href);
 
 function normalizeDocPath(url) {
     const pathPart = splitHref(url).path.split('?')[0];
-    if (!pathPart) {
-        return currentDocPath;
-    }
-
-    if (pathPart.startsWith('docs/')) {
-        return pathPart;
-    }
-
-    const absoluteUrl = new URL(pathPart, new URL(currentDocPath, viewerBaseUrl));
-    if (absoluteUrl.origin !== viewerBaseUrl.origin) {
-        return null;
-    }
-
-    const basePath = viewerBaseUrl.pathname;
-    if (!absoluteUrl.pathname.startsWith(basePath)) {
-        return null;
-    }
-
-    return decodeURIComponent(absoluteUrl.pathname.slice(basePath.length));
+    if (!pathPart) return currentDocPath;
+    if (pathPart.startsWith('docs/')) return pathPart;
+    const abs = new URL(pathPart, new URL(currentDocPath, viewerBaseUrl));
+    if (abs.origin !== viewerBaseUrl.origin) return null;
+    const base = viewerBaseUrl.pathname;
+    if (!abs.pathname.startsWith(base)) return null;
+    return decodeURIComponent(abs.pathname.slice(base.length));
 }
 
 function resolveAssetUrl(url) {
-    if (!url || isExternalUrl(url) || isHashOnly(url)) {
-        return url;
-    }
-
+    if (!url || isExternalUrl(url) || isHashOnly(url)) return url;
     if (url.startsWith('/')) {
-        const previewPrefix = location.pathname.startsWith('/site-preview/') ? '/site-preview' : '';
-        return new URL(`${previewPrefix}${url}`, location.origin).toString();
+        const prefix = location.pathname.startsWith('/site-preview/') ? '/site-preview' : '';
+        return new URL(`${prefix}${url}`, location.origin).toString();
     }
-
-    // Bare asset paths resolve to a mirrored folder under /assets/docs/<doc-path-without-ext>/.
     if (!/^(?:[./]|\/)/.test(url) && !url.startsWith('assets/') && !url.startsWith('docs/')) {
-        const docRelativePath = currentDocPath.startsWith('docs/') ? currentDocPath.slice('docs/'.length) : currentDocPath;
-        const docAssetFolder = docRelativePath.replace(/\.md$/i, '');
-
-        if (docAssetFolder) {
-            return new URL(`../../assets/docs/${docAssetFolder}/${url}`, viewerBaseUrl).toString();
-        }
+        const rel = currentDocPath.startsWith('docs/') ? currentDocPath.slice('docs/'.length) : currentDocPath;
+        const folder = rel.replace(/\.md$/i, '');
+        if (folder) return new URL(`../../assets/docs/${folder}/${url}`, viewerBaseUrl).toString();
     }
-
     return new URL(url, new URL(currentDocPath, viewerBaseUrl)).toString();
 }
 
 function renderContainer(type, title) {
-    return function containerRenderer(tokens, index) {
-        const token = tokens[index];
-        if (token.nesting === 1) {
-            return `<div class="md-alert md-alert-${type}"><div class="md-alert-title">${title}</div>`;
-        }
-
-        return '</div>';
+    return function (tokens, index) {
+        const t = tokens[index];
+        return t.nesting === 1
+            ? `<div class="md-alert md-alert-${type}"><div class="md-alert-title">${title}</div>`
+            : '</div>';
     };
 }
 
 const markdown = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    breaks: false,
-    highlight(code, language) {
-        if (language === 'mermaid') {
-            return `<pre class="mermaid">${escapeHtml(code)}</pre>`;
-        }
-
-        if (language && hljs.getLanguage(language)) {
-            return `<pre><code class="hljs language-${language}">${hljs.highlight(code, { language }).value}</code></pre>`;
-        }
-
+    html: true, linkify: true, typographer: true, breaks: false,
+    highlight(code, lang) {
+        if (lang === 'mermaid') return `<pre class="mermaid">${escapeHtml(code)}</pre>`;
+        if (lang && hljs.getLanguage(lang)) return `<pre><code class="hljs language-${lang}">${hljs.highlight(code, { language: lang }).value}</code></pre>`;
         return `<pre><code class="hljs">${escapeHtml(code)}</code></pre>`;
     }
 })
@@ -196,12 +121,7 @@ const markdown = new MarkdownIt({
     .use(markdownItAttrs)
     .use(markdownItAnchor, {
         slugify: slugifyHeading,
-        permalink: markdownItAnchor.permalink.linkInsideHeader({
-            symbol: '#',
-            placement: 'after',
-            class: 'header-anchor',
-            ariaHidden: true
-        })
+        permalink: markdownItAnchor.permalink.linkInsideHeader({ symbol: '#', placement: 'after', class: 'header-anchor', ariaHidden: true })
     })
     .use(markdownItContainer, 'note', { render: renderContainer('note', 'Note') })
     .use(markdownItContainer, 'tip', { render: renderContainer('tip', 'Tip') })
@@ -209,428 +129,286 @@ const markdown = new MarkdownIt({
     .use(markdownItContainer, 'danger', { render: renderContainer('danger', 'Danger') })
     .use(markdownItContainer, 'details', {
         render(tokens, index) {
-            const token = tokens[index];
-            if (token.nesting === 1) {
-                const info = token.info.trim().slice('details'.length).trim() || 'Details';
-                return `<details class="md-details"><summary>${escapeHtml(info)}</summary>`;
-            }
-
-            return '</details>';
+            const t = tokens[index];
+            return t.nesting === 1
+                ? `<details class="md-details"><summary>${escapeHtml(t.info.trim().slice('details'.length).trim() || 'Details')}</summary>`
+                : '</details>';
         }
     });
 
-const defaultLinkOpen = markdown.renderer.rules.link_open || function defaultLinkRender(tokens, index, options, env, self) {
-    return self.renderToken(tokens, index, options);
-};
+const defaultLinkOpen = markdown.renderer.rules.link_open || ((t, i, o, e, s) => s.renderToken(t, i, o));
 
-markdown.renderer.rules.link_open = function linkOpen(tokens, index, options, env, self) {
+markdown.renderer.rules.link_open = function (tokens, index, options, env, self) {
     const token = tokens[index];
-    const hrefIndex = token.attrIndex('href');
-
-    if (hrefIndex >= 0) {
-        const href = token.attrs[hrefIndex][1];
+    const hi = token.attrIndex('href');
+    if (hi >= 0) {
+        const href = token.attrs[hi][1];
         const { anchor } = splitHref(href);
-
         if (!isExternalUrl(href) && !isHashOnly(href)) {
-            const normalizedDocPath = normalizeDocPath(href);
-            if (normalizedDocPath && normalizedDocPath.endsWith('.md')) {
-                token.attrs[hrefIndex][1] = buildDocumentUrl(normalizedDocPath, anchor);
-                token.attrSet('data-doc-link', normalizedDocPath);
-                if (anchor) {
-                    token.attrSet('data-doc-anchor', anchor);
-                }
+            const norm = normalizeDocPath(href);
+            if (norm && norm.endsWith('.md')) {
+                token.attrs[hi][1] = buildDocumentUrl(norm, anchor);
+                token.attrSet('data-doc-link', norm);
+                if (anchor) token.attrSet('data-doc-anchor', anchor);
             } else {
-                token.attrs[hrefIndex][1] = resolveAssetUrl(href);
+                token.attrs[hi][1] = resolveAssetUrl(href);
             }
         } else if (isExternalUrl(href)) {
             token.attrSet('target', '_blank');
             token.attrSet('rel', 'noopener noreferrer');
         }
     }
-
     return defaultLinkOpen(tokens, index, options, env, self);
 };
 
-markdown.renderer.rules.image = function image(tokens, index, options, env, self) {
+markdown.renderer.rules.image = function (tokens, index, options, env, self) {
     const token = tokens[index];
-    const srcIndex = token.attrIndex('src');
-    if (srcIndex >= 0) {
-        token.attrs[srcIndex][1] = resolveAssetUrl(token.attrs[srcIndex][1]);
-    }
-
+    const si = token.attrIndex('src');
+    if (si >= 0) token.attrs[si][1] = resolveAssetUrl(token.attrs[si][1]);
     return self.renderToken(tokens, index, options);
 };
 
-function renderNavTree(items, depth = 0) {
-    const container = document.createElement('div');
-    container.className = depth === 0 ? 'nav-tree' : 'nav-children';
+// ── Vue 应用 ──
 
-    items.forEach(item => {
-        if (item.type === 'dir') {
-            const details = document.createElement('details');
-            details.className = 'nav-folder';
-            details.open = true;
+const app = createApp({
+    setup() {
+        const manifestItems = ref([]);
+        const manifestLoaded = ref(false);
+        const searchQuery = ref('');
+        const currentDocPathRef = ref('');
+        const currentHeadingId = ref('');
+        const collapsed = ref(false);
+        const mobileOpen = ref(false);
+        const docHtml = ref('<p class="loading">加载中…</p>');
+        const tocItems = ref([]);
+        const loaded = ref(false);
+        let tocObserver = null;
+        let tocHeadings = [];
 
-            const summary = document.createElement('summary');
-            summary.className = 'nav-folder-title';
-            summary.textContent = item.title;
+        const filteredNav = computed(() => {
+            const q = searchQuery.value.trim().toLowerCase();
+            if (!q) return manifestItems.value;
+            return filterTree(manifestItems.value, q);
+        });
 
-            details.appendChild(summary);
-            details.appendChild(renderNavTree(item.children || [], depth + 1));
-            container.appendChild(details);
-            return;
+        function filterTree(items, q) {
+            return items.reduce((acc, item) => {
+                if (item.type === 'dir') {
+                    const children = filterTree(item.children || [], q);
+                    if (children.length > 0) acc.push({ ...item, children });
+                } else {
+                    const text = [item.title, item.path].join(' ').toLowerCase();
+                    if (text.includes(q)) acc.push(item);
+                }
+                return acc;
+            }, []);
         }
 
-        const link = document.createElement('a');
-        link.className = 'nav-link';
-        link.href = buildDocumentUrl(item.path);
-        link.textContent = item.title;
-        link.dataset.doc = item.path;
-        link.style.setProperty('--depth', String(depth));
-        navLinksByPath.set(item.path, link);
-        container.appendChild(link);
-    });
+        async function loadDoc(path, { heading = '', pushHistory = false, replaceHistory = false } = {}) {
+            currentDocPath = path;
+            currentDocPathRef.value = path;
+            docHtml.value = '<p class="loading">加载中…</p>';
+            mobileOpen.value = false;
 
-    return container;
-}
+            try {
+                const res = await fetch(path);
+                if (!res.ok) throw new Error('文件未找到');
+                const md = await res.text();
 
-function renderSidebar(items) {
-    navLinksByPath = new Map();
-    sidebarNav.innerHTML = '';
-    sidebarNav.appendChild(renderNavTree(items));
-}
+                let rendered;
+                try {
+                    const { src, blocks } = preserveBlockMath(md);
+                    rendered = restoreBlockMath(markdown.render(src), blocks);
+                } catch (e) {
+                    console.error('Markdown render error:', e);
+                    throw e;
+                }
 
-function flattenDocs(items, parents = []) {
-    return items.flatMap(item => {
-        if (item.type === 'dir') {
-            return flattenDocs(item.children || [], [...parents, item.title]);
-        }
+                try {
+                    docHtml.value = DOMPurify.sanitize(rendered);
+                } catch (e) {
+                    console.error('DOMPurify error:', e);
+                    docHtml.value = rendered;
+                }
 
-        return [{
-            title: item.title,
-            path: item.path,
-            searchText: [...parents, item.title, item.path].join(' ').toLowerCase()
-        }];
-    });
-}
+                loaded.value = true;
+                await nextTick();
+                enhanceRenderedContent(heading);
 
-function filterSidebar(query) {
-    const keyword = query.trim().toLowerCase();
-
-    if (!keyword) {
-        renderSidebar(manifestItems);
-        updateActiveNav(currentDocPath);
-        return;
-    }
-
-    const matches = flattenedDocs.filter(item => item.searchText.includes(keyword));
-    navLinksByPath = new Map();
-    sidebarNav.innerHTML = '';
-
-    if (matches.length === 0) {
-        sidebarNav.innerHTML = '<p class="nav-empty">没有找到匹配的文档</p>';
-        return;
-    }
-
-    const container = document.createElement('div');
-    container.className = 'nav-tree';
-    matches.forEach(item => {
-        const link = document.createElement('a');
-        link.className = 'nav-link';
-        link.href = buildDocumentUrl(item.path);
-        link.textContent = item.title;
-        link.dataset.doc = item.path;
-        navLinksByPath.set(item.path, link);
-        container.appendChild(link);
-    });
-
-    sidebarNav.appendChild(container);
-    updateActiveNav(currentDocPath);
-}
-
-function findFirstDoc(items) {
-    for (const item of items) {
-        if (item.type === 'file') {
-            return item.path;
-        }
-
-        if (item.type === 'dir') {
-            const child = findFirstDoc(item.children || []);
-            if (child) {
-                return child;
+                const method = replaceHistory ? 'replaceState' : 'pushState';
+                if (replaceHistory || pushHistory) {
+                    history[method]({ doc: path, heading }, '', buildDocumentUrl(path, heading));
+                }
+            } catch (e) {
+                console.error('loadDoc full error:', e);
+                docHtml.value = '<p style="color:#e74c3c">⚠️ 无法加载文档：' + e.message + '</p>';
+                tocItems.value = [];
             }
         }
-    }
 
-    return '';
-}
-
-function updateActiveNav(path) {
-    navLinksByPath.forEach(link => link.classList.remove('active'));
-    const activeLink = navLinksByPath.get(path);
-    if (!activeLink) {
-        return;
-    }
-
-    activeLink.classList.add('active');
-    let parent = activeLink.parentElement;
-    while (parent) {
-        if (parent.tagName === 'DETAILS') {
-            parent.open = true;
+        function enhanceRenderedContent(headingId) {
+            const body = document.getElementById('markdown-body');
+            if (!body) return;
+            body.querySelectorAll('.block-math').forEach(node => {
+                const expr = node.dataset.math ? decodeURIComponent(node.dataset.math) : '';
+                if (window.katex?.render) window.katex.render(expr, node, { displayMode: true, throwOnError: false });
+            });
+            try {
+                if (typeof renderMathInElement === 'function') {
+                    renderMathInElement(body, {
+                        delimiters: [
+                            { left: '$$', right: '$$', display: true },
+                            { left: '$', right: '$', display: false },
+                            { left: '\\(', right: '\\)', display: false },
+                            { left: '\\[', right: '\\]', display: true }
+                        ],
+                        throwOnError: false
+                    });
+                }
+            } catch (e) { console.warn('KaTeX render error:', e); }
+            try {
+                const mermaidBlocks = body.querySelectorAll('.mermaid');
+                if (mermaidBlocks.length > 0) mermaid.run({ nodes: mermaidBlocks });
+            } catch (e) { console.warn('Mermaid render error:', e); }
+            buildToc();
+            scrollToHeading(headingId, false);
         }
-        parent = parent.parentElement;
-    }
-}
 
-function setActiveToc(headingId) {
-    currentHeadingId = headingId || '';
-    tocNav.querySelectorAll('.toc-link').forEach(link => {
-        link.classList.toggle('active', link.dataset.heading === currentHeadingId);
-    });
-}
-
-function extractHeadingText(heading) {
-    const clone = heading.cloneNode(true);
-    clone.querySelectorAll('.header-anchor').forEach(node => node.remove());
-    return clone.textContent.trim();
-}
-
-function updateActiveTocFromScroll() {
-    if (tocHeadings.length === 0) {
-        return;
-    }
-
-    const offset = 140;
-    let activeHeading = tocHeadings[0];
-
-    for (const heading of tocHeadings) {
-        if (heading.getBoundingClientRect().top - offset <= 0) {
-            activeHeading = heading;
-        } else {
-            break;
-        }
-    }
-
-    setActiveToc(activeHeading.id);
-}
-
-function buildToc() {
-    if (tocObserver) {
-        tocObserver.disconnect();
-        tocObserver = null;
-    }
-
-    const headings = Array.from(body.querySelectorAll('h1[id], h2[id], h3[id], h4[id]'));
-    tocHeadings = headings;
-    tocNav.innerHTML = '';
-
-    if (headings.length === 0) {
-        tocHeadings = [];
-        tocNav.innerHTML = '<p class="toc-empty">当前页没有可用标题</p>';
-        return;
-    }
-
-    const fragment = document.createDocumentFragment();
-
-    headings.forEach(heading => {
-        const link = document.createElement('a');
-        link.className = `toc-link toc-level-${heading.tagName.slice(1)}`;
-        link.href = `#${encodeURIComponent(heading.id)}`;
-        link.textContent = extractHeadingText(heading);
-        link.dataset.heading = heading.id;
-        fragment.appendChild(link);
-    });
-
-    tocNav.appendChild(fragment);
-    updateActiveTocFromScroll();
-
-    tocObserver = new IntersectionObserver(entries => {
-        if (entries.some(entry => entry.isIntersecting)) {
+        function buildToc() {
+            if (tocObserver) { tocObserver.disconnect(); tocObserver = null; }
+            const body = document.getElementById('markdown-body');
+            const headings = Array.from(body.querySelectorAll('h1[id], h2[id], h3[id], h4[id]'));
+            tocHeadings = headings;
+            if (headings.length === 0) { tocItems.value = []; return; }
+            tocItems.value = headings.map(h => ({ id: h.id, text: extractHeadingText(h), level: h.tagName.slice(1) }));
+            tocObserver = new IntersectionObserver(entries => {
+                if (entries.some(e => e.isIntersecting)) updateActiveTocFromScroll();
+            }, { rootMargin: '-96px 0px -68% 0px', threshold: [0, 1] });
+            headings.forEach(h => tocObserver.observe(h));
             updateActiveTocFromScroll();
         }
-    }, {
-        rootMargin: '-96px 0px -68% 0px',
-        threshold: [0, 1]
-    });
 
-    headings.forEach(heading => tocObserver.observe(heading));
-}
+        function extractHeadingText(heading) {
+            const clone = heading.cloneNode(true);
+            clone.querySelectorAll('.header-anchor').forEach(n => n.remove());
+            return clone.textContent.trim();
+        }
 
-function scrollToHeading(headingId, smooth = false) {
-    if (!headingId) {
-        window.scrollTo(0, 0);
-        return;
-    }
+        function updateActiveTocFromScroll() {
+            if (tocHeadings.length === 0) return;
+            let active = tocHeadings[0];
+            for (const h of tocHeadings) {
+                if (h.getBoundingClientRect().top - 140 <= 0) active = h; else break;
+            }
+            currentHeadingId.value = active.id;
+        }
 
-    const target = document.getElementById(headingId);
-    if (!target) {
-        window.scrollTo(0, 0);
-        return;
-    }
+        function scrollToHeading(id, smooth = false) {
+            if (!id) { window.scrollTo(0, 0); return; }
+            const el = document.getElementById(id);
+            if (!el) { window.scrollTo(0, 0); return; }
+            el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+            currentHeadingId.value = id;
+            history.replaceState({ doc: currentDocPath, heading: id }, '', buildDocumentUrl(currentDocPath, id));
+        }
 
-    target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
-    setActiveToc(headingId);
-}
+        function findFirstDoc(items) {
+            for (const item of items) {
+                if (item.type === 'file') return item.path;
+                if (item.type === 'dir') { const c = findFirstDoc(item.children || []); if (c) return c; }
+            }
+            return '';
+        }
 
-async function enhanceRenderedContent(headingId) {
-    renderBlockMath();
+        // 通过 provide 传递给子组件
+        provide('navigateTo', (path) => loadDoc(path, { pushHistory: true }));
 
-    if (typeof renderMathInElement === 'function') {
-        renderMathInElement(body, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false },
-                { left: '\\(', right: '\\)', display: false },
-                { left: '\\[', right: '\\]', display: true }
-            ],
-            throwOnError: false
+        onMounted(async () => {
+            collapsed.value = localStorage.getItem('documentSidebarCollapsed') === '1';
+            watch(collapsed, v => localStorage.setItem('documentSidebarCollapsed', v ? '1' : '0'));
+
+            const keyHandler = e => {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault();
+                    const input = document.getElementById('doc-search');
+                    input.focus(); input.select();
+                }
+            };
+            window.addEventListener('keydown', keyHandler);
+            onUnmounted(() => window.removeEventListener('keydown', keyHandler));
+
+            window.addEventListener('scroll', updateActiveTocFromScroll, { passive: true });
+            onUnmounted(() => window.removeEventListener('scroll', updateActiveTocFromScroll));
+
+            const popHandler = async () => {
+                const state = readLocationState();
+                const fallback = findFirstDoc(manifestItems.value);
+                if (state.doc || fallback) await loadDoc(state.doc || fallback, { heading: state.heading });
+            };
+            window.addEventListener('popstate', popHandler);
+            onUnmounted(() => window.removeEventListener('popstate', popHandler));
+
+            // 文档内容链接点击（事件委托）
+            document.getElementById('markdown-body').addEventListener('click', e => {
+                const link = e.target.closest('a[data-doc-link]');
+                if (!link) return;
+                e.preventDefault();
+                loadDoc(link.dataset.docLink, { heading: link.dataset.docAnchor || '', pushHistory: true });
+            });
+
+            try {
+                const res = await fetch('docs-manifest.json');
+                if (!res.ok) throw new Error('无法加载文档清单');
+                const manifest = await res.json();
+                manifestItems.value = manifest.items || [];
+                manifestLoaded.value = true;
+
+                const state = readLocationState();
+                const initial = state.doc || findFirstDoc(manifestItems.value);
+                if (!initial) throw new Error('未找到可用文档');
+                await loadDoc(initial, { heading: state.heading, replaceHistory: !state.doc });
+            } catch (e) {
+                manifestLoaded.value = true;
+                docHtml.value = '<p style="color:#e74c3c">⚠️ ' + e.message + '</p>';
+            }
         });
-    }
 
-    const mermaidBlocks = body.querySelectorAll('.mermaid');
-    if (mermaidBlocks.length > 0) {
-        await mermaid.run({ nodes: mermaidBlocks });
-    }
-
-    buildToc();
-    scrollToHeading(headingId, false);
-}
-
-async function loadDoc(path, { heading = '', pushHistory = false, replaceHistory = false } = {}) {
-    currentDocPath = path;
-    body.innerHTML = '<p class="loading">加载中…</p>';
-    updateActiveNav(path);
-
-    try {
-        const res = await fetch(path);
-        if (!res.ok) {
-            throw new Error('文件未找到');
-        }
-
-        const md = await res.text();
-        const { protectedSource, blocks } = preserveBlockMath(md);
-        const rendered = restoreBlockMath(markdown.render(protectedSource), blocks);
-        body.innerHTML = DOMPurify.sanitize(rendered);
-        await enhanceRenderedContent(heading);
-
-        const method = replaceHistory ? 'replaceState' : 'pushState';
-        if (replaceHistory || pushHistory) {
-            history[method]({ doc: path, heading }, '', buildDocumentUrl(path, heading));
-        }
-    } catch (error) {
-        body.innerHTML = '<p style="color:#e74c3c">⚠️ 无法加载文档：' + error.message + '</p>';
-        tocNav.innerHTML = '<p class="toc-empty">当前页没有可用标题</p>';
-    }
-}
-
-function toggleSidebar() {
-    mobileSidebar.classList.toggle('open');
-}
-
-function setSidebarCollapsed(collapsed) {
-    document.body.classList.toggle('sidebar-collapsed', collapsed);
-    sidebarCollapse.setAttribute('aria-label', collapsed ? '展开左侧导航' : '收起左侧导航');
-    sidebarCollapse.title = collapsed ? '展开左侧导航' : '收起左侧导航';
-    localStorage.setItem('documentSidebarCollapsed', collapsed ? '1' : '0');
-}
-
-body.addEventListener('click', event => {
-    const link = event.target.closest('a[data-doc-link]');
-    if (!link) {
-        return;
-    }
-
-    event.preventDefault();
-    loadDoc(link.dataset.docLink, {
-        heading: link.dataset.docAnchor || '',
-        pushHistory: true
-    });
-});
-
-sidebarNav.addEventListener('click', event => {
-    const link = event.target.closest('a[data-doc]');
-    if (!link) {
-        return;
-    }
-
-    event.preventDefault();
-    mobileSidebar.classList.remove('open');
-    loadDoc(link.dataset.doc, { pushHistory: true });
-});
-
-tocNav.addEventListener('click', event => {
-    const link = event.target.closest('a[data-heading]');
-    if (!link) {
-        return;
-    }
-
-    event.preventDefault();
-    const headingId = link.dataset.heading;
-    scrollToHeading(headingId, true);
-    history.replaceState({ doc: currentDocPath, heading: headingId }, '', buildDocumentUrl(currentDocPath, headingId));
-});
-
-menuToggle.addEventListener('click', toggleSidebar);
-
-sidebarCollapse.addEventListener('click', () => {
-    setSidebarCollapsed(!document.body.classList.contains('sidebar-collapsed'));
-});
-
-docSearch.addEventListener('input', event => {
-    filterSidebar(event.target.value);
-});
-
-window.addEventListener('keydown', event => {
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        docSearch.focus();
-        docSearch.select();
+        return {
+            manifestItems, manifestLoaded, searchQuery, currentDocPath: currentDocPathRef,
+            currentHeadingId, collapsed, mobileOpen, docHtml, tocItems, loaded,
+            filteredNav, loadDoc, scrollToHeading
+        };
     }
 });
 
-async function loadManifest() {
-    const response = await fetch('docs-manifest.json');
-    if (!response.ok) {
-        throw new Error('无法加载文档清单');
-    }
+// ── 递归组件：侧边栏目录树 ──
 
-    return response.json();
-}
-
-async function initializeDocs() {
-    try {
-        setSidebarCollapsed(localStorage.getItem('documentSidebarCollapsed') === '1');
-
-        const manifest = await loadManifest();
-        manifestItems = manifest.items || [];
-        flattenedDocs = flattenDocs(manifestItems);
-        renderSidebar(manifestItems);
-
-        const state = readLocationState();
-        const initialDoc = state.doc || findFirstDoc(manifestItems);
-        if (!initialDoc) {
-            throw new Error('未找到可用文档');
-        }
-
-        await loadDoc(initialDoc, {
-            heading: state.heading,
-            replaceHistory: !state.doc
-        });
-    } catch (error) {
-        sidebarNav.innerHTML = '<p class="loading">⚠️ 文档目录加载失败</p>';
-        body.innerHTML = '<p style="color:#e74c3c">⚠️ 初始化文档站失败：' + error.message + '</p>';
-        tocNav.innerHTML = '<p class="toc-empty">当前页没有可用标题</p>';
-    }
-}
-
-window.addEventListener('popstate', async () => {
-    const state = readLocationState();
-    const fallbackDoc = findFirstDoc(manifestItems);
-    if (state.doc || fallbackDoc) {
-        await loadDoc(state.doc || fallbackDoc, { heading: state.heading });
-    }
+app.component('nav-tree', {
+    props: ['items', 'depth', 'currentDoc'],
+    setup() {
+        const navigateTo = inject('navigateTo');
+        function buildUrl(path) { return buildDocumentUrl(path); }
+        function navigate(path) { navigateTo(path); }
+        return { buildUrl, navigate };
+    },
+    template: `
+        <div :class="depth === 0 ? 'nav-tree' : 'nav-children'">
+            <template v-for="item in items" :key="item.path || item.title">
+                <details v-if="item.type === 'dir'" class="nav-folder" open>
+                    <summary class="nav-folder-title">{{ item.title }}</summary>
+                    <nav-tree :items="item.children || []" :depth="depth + 1" :current-doc="currentDoc" />
+                </details>
+                <a v-else
+                   class="nav-link"
+                   :class="{ active: item.path === currentDoc }"
+                   :href="buildUrl(item.path)"
+                   :style="{ '--depth': depth }"
+                   @click.prevent="navigate(item.path)">
+                    {{ item.title }}
+                </a>
+            </template>
+        </div>
+    `
 });
 
-window.addEventListener('scroll', updateActiveTocFromScroll, { passive: true });
-
-initializeDocs();
+app.mount('#app');

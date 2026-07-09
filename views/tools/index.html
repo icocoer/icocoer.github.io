@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="./tools.css">
 </head>
 <body>
-    <div class="page-shell">
+    <div class="page-shell" id="app">
         <div class="page-nav">
             <a class="back-link" href="../../index.html">← 返回首页</a>
             <a class="nav-link-pill" href="../document/document.html">文档页</a>
@@ -33,7 +33,7 @@
                 <span class="note-label">当前用途</span>
                 <p>给站里那些零散的小工具，做一个统一入口。</p>
                 <ul>
-                    <li>本地工具与外链工具都能收</li>
+                    <li>一些我觉得有点用的小工具</li>
                     <li>工具都经过本人挑选</li>
                     <li>持续更新中，敬请期待</li>
                 </ul>
@@ -46,11 +46,27 @@
                     <p class="eyebrow">Directory</p>
                     <h2>现在已经挂上的工具</h2>
                 </div>
-                <p class="section-tip" id="tool-count">加载中...</p>
+                <p class="section-tip">{{ loaded ? '共 ' + tools.length + ' 个工具' : '加载中...' }}</p>
             </div>
 
-            <div class="tools-grid" id="tool-list" aria-live="polite"></div>
-            <div class="empty-state" id="tool-empty" hidden>工具列表暂时没有加载出来，稍后再试。</div>
+            <div class="tools-grid" aria-live="polite">
+                <article class="tool-card" v-for="tool in tools" :key="tool.href">
+                    <div class="tool-head">
+                        <div>
+                            <span class="tool-kind">{{ tool.kind || '工具' }}</span>
+                            <h3>{{ tool.title }}</h3>
+                        </div>
+                    </div>
+                    <p class="tool-description">{{ tool.description || '' }}</p>
+                    <div class="tool-tags">
+                        <span class="tool-tag" v-for="tag in (tool.tags || [])" :key="tag">{{ tag }}</span>
+                    </div>
+                    <a class="tool-link" :href="tool.href" :target="tool.external ? '_blank' : '_self'" :rel="tool.external ? 'noopener noreferrer' : ''">{{ tool.actionText || '打开工具' }}</a>
+                </article>
+            </div>
+
+            <div class="empty-state" v-if="loaded && tools.length === 0">工具列表暂时没有加载出来，稍后再试。</div>
+            <div class="empty-state" v-if="error">{{ error }}</div>
         </section>
 
         <footer>
@@ -58,6 +74,7 @@
         </footer>
     </div>
 
-    <script type="module" src="./tools.js"></script>
+    <script src="../../assets/js/vue.js"></script>
+    <script src="./tools.js"></script>
 </body>
 </html>

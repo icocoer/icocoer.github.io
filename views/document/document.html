@@ -16,18 +16,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <link rel="stylesheet" href="./document.css">
 </head>
-<body>
+<body id="app" :class="{ 'sidebar-collapsed': collapsed }">
 
-    <button id="menu-toggle" type="button" aria-label="Toggle menu">☰</button>
+    <button id="menu-toggle" type="button" aria-label="Toggle menu" @click="mobileOpen = !mobileOpen">☰</button>
 
     <header id="topbar">
         <div class="brand-area">
             <a class="brand" href="../../index.html">ICOCOER 文档</a>
-            <button id="sidebar-collapse" type="button" aria-label="收起左侧导航" title="收起左侧导航">‹</button>
+            <button id="sidebar-collapse" type="button" :aria-label="collapsed ? '展开左侧导航' : '收起左侧导航'" :title="collapsed ? '展开左侧导航' : '收起左侧导航'" @click="collapsed = !collapsed">‹</button>
         </div>
         <div class="doc-search">
             <span class="search-icon">⌕</span>
-            <input id="doc-search" type="search" placeholder="搜索文档" autocomplete="off">
+            <input id="doc-search" type="search" placeholder="搜索文档" autocomplete="off" v-model="searchQuery">
             <kbd>Ctrl</kbd><kbd>K</kbd>
         </div>
         <nav class="top-nav" aria-label="主导航">
@@ -37,27 +37,37 @@
         </nav>
     </header>
 
-    <nav id="sidebar">
+    <nav id="sidebar" :class="{ open: mobileOpen }">
         <div class="sidebar-header">
             <div class="sidebar-title">文档目录</div>
             <p class="sidebar-subtitle">按主题浏览所有笔记</p>
         </div>
         <div class="sidebar-nav">
-            <p class="loading">加载目录中…</p>
+            <p v-if="!manifestLoaded" class="loading">加载目录中…</p>
+            <p v-else-if="filteredNav.length === 0" class="nav-empty">没有找到匹配的文档</p>
+            <nav-tree v-else :items="filteredNav" :depth="0" :current-doc="currentDocPath"></nav-tree>
         </div>
     </nav>
 
     <div id="content-wrap">
         <div id="content-grid">
-            <article id="markdown-body">
-                <p class="loading">加载中…</p>
-            </article>
+            <article id="markdown-body" v-html="docHtml"></article>
 
             <aside id="toc-panel">
                 <div class="toc-card">
                     <div class="toc-title">此页内容</div>
                     <nav id="toc-nav">
-                        <p class="toc-empty">当前页没有可用标题</p>
+                        <p v-if="tocItems.length === 0" class="toc-empty">{{ loaded ? '当前页没有可用标题' : '' }}</p>
+                        <template v-else>
+                            <a v-for="heading in tocItems"
+                               :key="heading.id"
+                               :class="['toc-link', 'toc-level-' + heading.level, { active: heading.id === currentHeadingId }]"
+                               :href="'#' + encodeURIComponent(heading.id)"
+                               :data-heading="heading.id"
+                               @click.prevent="scrollToHeading(heading.id, true)">
+                                {{ heading.text }}
+                            </a>
+                        </template>
                     </nav>
                 </div>
             </aside>
@@ -66,6 +76,7 @@
 
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <script src="../../assets/js/vue.js"></script>
     <script type="module" src="./document.js"></script>
 </body>
 </html>
