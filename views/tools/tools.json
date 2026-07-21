@@ -12,6 +12,18 @@
         "转换",
         "本地处理"
       ]
+    },
+    {
+      "title": "cocogoat成就管理",
+      "description": "cocogoat成就管理",
+      "kind": "本地工具",
+      "href": "./cocogoat/index.html",
+      "actionText": "打开工具",
+      "external": false,
+      "tags": [
+        "原神",
+        "成就"
+      ]
     }
   ]
 }

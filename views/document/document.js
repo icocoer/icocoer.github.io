@@ -325,7 +325,11 @@ const app = createApp({
 
         onMounted(async () => {
             collapsed.value = localStorage.getItem('documentSidebarCollapsed') === '1';
-            watch(collapsed, v => localStorage.setItem('documentSidebarCollapsed', v ? '1' : '0'));
+            watch(collapsed, v => {
+                document.body.classList.toggle('sidebar-collapsed', v);
+                localStorage.setItem('documentSidebarCollapsed', v ? '1' : '0');
+            });
+            document.body.classList.toggle('sidebar-collapsed', collapsed.value);
 
             const keyHandler = e => {
                 if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
