@@ -1,12 +1,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --accent: #2f6feb;
+    --accent: #3b82f6;
     --accent-soft: #eff6ff;
     --bg: #ffffff;
     --sidebar-bg: #fbfbfd;
-    --text: #24292f;
-    --muted: #6e7781;
+    --text: #1a2332;
+    --muted: #5a6a7a;
     --border: #d8dee4;
     --border-soft: #eef1f5;
     --code-bg: #f6f8fa;
@@ -57,7 +57,7 @@ body {
     width: 30px;
     height: 30px;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 4px;
     background: #fff;
     color: var(--muted);
     cursor: pointer;
@@ -82,7 +82,7 @@ body {
     align-items: center;
     gap: 8px;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 6px;
     background: var(--code-bg);
     padding: 0 10px;
     color: var(--muted);
@@ -110,7 +110,7 @@ body {
 .doc-search kbd {
     min-width: 22px;
     border: 1px solid var(--border);
-    border-radius: 5px;
+    border-radius: 3px;
     background: #fff;
     color: var(--muted);
     font-size: 0.72rem;
@@ -219,7 +219,7 @@ body.sidebar-collapsed #sidebar-collapse {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 .nav-folder-title::after {
@@ -244,7 +244,7 @@ body.sidebar-collapsed #sidebar-collapse {
     display: block;
     color: var(--text);
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 8px 12px;
     margin-left: calc(var(--depth, 0) * 4px);
     transition: background 0.15s ease, color 0.15s ease;
@@ -279,7 +279,7 @@ body.sidebar-collapsed #sidebar-collapse {
     background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 8px 12px;
     font-size: 1.1rem;
     cursor: pointer;
@@ -350,7 +350,7 @@ body.sidebar-collapsed #sidebar-collapse {
     font-size: 0.88rem;
     line-height: 1.4;
     transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 .toc-link:hover {
@@ -398,7 +398,7 @@ body.sidebar-collapsed #sidebar-collapse {
     display: block;
     max-width: 100%;
     height: auto;
-    border-radius: 12px;
+    border-radius: 4px;
     margin: 16px 0 20px;
 }
 
@@ -468,7 +468,7 @@ body.sidebar-collapsed #sidebar-collapse {
 #markdown-body code {
     background: var(--code-bg);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 3px;
     padding: 2px 6px;
     font-size: 0.875em;
     font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
@@ -477,7 +477,7 @@ body.sidebar-collapsed #sidebar-collapse {
 #markdown-body pre {
     background: var(--code-bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 4px;
     padding: 22px;
     overflow-x: auto;
     margin-bottom: 22px;
@@ -493,7 +493,7 @@ body.sidebar-collapsed #sidebar-collapse {
 #markdown-body .mermaid {
     background: #fff;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 4px;
     padding: 18px;
     margin-bottom: 22px;
     overflow-x: auto;
@@ -504,7 +504,7 @@ body.sidebar-collapsed #sidebar-collapse {
     background: var(--accent-soft);
     padding: 14px 16px;
     margin-bottom: 18px;
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 4px 4px 0;
     color: var(--muted);
 }
 
@@ -569,7 +569,7 @@ body.sidebar-collapsed #sidebar-collapse {
 #markdown-body .md-alert {
     border: 1px solid var(--border);
     border-left-width: 4px;
-    border-radius: 12px;
+    border-radius: 4px;
     padding: 14px 16px;
     margin-bottom: 18px;
     background: #fff;
