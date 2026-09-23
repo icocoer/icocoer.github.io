@@ -373,6 +373,11 @@ footer a {
     color: inherit;
 }
 
+footer .beian,
+footer a[href*="beian"] {
+    line-height: 1.8;
+}
+
 @media (max-width: 960px) {
     .hero,
     .card-grid,

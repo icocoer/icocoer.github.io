@@ -301,6 +301,18 @@ body.sidebar-collapsed #sidebar-collapse {
     padding: 42px 36px 72px;
 }
 
+.site-footer {
+    text-align: center;
+    padding: 0 24px 28px;
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.8;
+}
+
+.site-footer a {
+    color: inherit;
+}
+
 #markdown-body {
     min-width: 0;
     background: transparent;

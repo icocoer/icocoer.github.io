@@ -258,6 +258,11 @@ footer {
     margin-top: 28px;
     color: var(--muted);
     font-size: 0.84rem;
+    line-height: 1.8;
+}
+
+footer a {
+    color: inherit;
 }
 
 @media (max-width: 860px) {

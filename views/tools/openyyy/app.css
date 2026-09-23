@@ -66,6 +66,16 @@
     color: #516070;
 }
 
+.app-footer .beian {
+    margin-top: 8px;
+    font-size: 0.86rem;
+    line-height: 1.8;
+}
+
+.app-footer .beian a {
+    color: inherit;
+}
+
 @media (max-width: 767px) {
     .app-nav-copy {
         float: none;

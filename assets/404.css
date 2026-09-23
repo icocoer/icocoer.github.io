@@ -34,6 +34,18 @@ body {
     width: min(960px, 100%);
 }
 
+.beian {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.8;
+}
+
+.beian a {
+    color: inherit;
+}
+
 .error-card {
     border: 1px solid var(--border);
     background: var(--panel);
